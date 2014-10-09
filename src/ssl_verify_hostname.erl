@@ -54,12 +54,13 @@ wildcard_not_in_a_label(BeforeW, AfterWString) ->
   (string:str(BeforeW, "xn--") == 0) andalso (0 == (string:str(string:substr(AfterWString, 1, AfterDotPos), "xn--"))).
 
 try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
-  %% not
-  %% compare AfterW part with end of pattern with length (length AfterW)
-  %% if Wildcard was the only character in left-most label in identifier
-  %% and if it wasn't it doesn't matter since parts after Wildcard should match unconditionally
-  %% however if Wildcard was the only character in left-most label we can't match this *.example.com and bar.foo.example.com
-  %% if i'm correct if it wasn't we can match like this: *o.example.com = bar.foo.example.com
+  %% Compare AfterW part with end of pattern with length (length AfterW)
+  %% was Wildcard the only character in left-most label in identifier
+  %% doesn't matter since parts after Wildcard should match unconditionally.
+  %% However if Wildcard was the only character in left-most label we can't match this *.example.com and bar.foo.example.com
+  %% if i'm correct if it wasn't the only character
+  %% we can match like this: *o.example.com = bar.foo.example.com
+  %% but this is prohibited anyway thanks to check_wildcard_in_leftmost_label
   FirstPatternDotPos = string:chr(Pattern, $.),
   case SingleCharW of
     true ->
