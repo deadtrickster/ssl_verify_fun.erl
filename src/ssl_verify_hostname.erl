@@ -9,9 +9,9 @@
 -include_lib("ssl/src/ssl_alert.hrl").
 
 
--export([verify_fun/3, try_match_hostname/2]).
+-export([verify_fun/3, verify_cert_hostname/2]).
 -ifdef(TEST).
--export([validate_and_parse_wildcard_identifier/2]).
+-export([validate_and_parse_wildcard_identifier/2, try_match_hostname/2]).
 -endif.
 
 %% extract cn from subject
