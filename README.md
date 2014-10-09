@@ -77,4 +77,4 @@ path_validation_alert(Reason) ->
 ```
 
 * With custom verify_fun:
-Call verify_cert_hostname/2 with Certificate and Hostname.
+Call `verify_cert_hostname/2` with Certificate and Hostname.
