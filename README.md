@@ -1,3 +1,6 @@
+##Hostname verification library for Erlang [![Build Status](https://travis-ci.org/deadtrickster/ssl_verify_hostname.erl.svg?branch=master)](https://travis-ci.org/deadtrickster/ssl_verify_hostname.erl)
+
+
 
 ### Excerpt from RFC(http://tools.ietf.org/html/rfc6125)###
 
