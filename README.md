@@ -50,7 +50,7 @@
 
 ###Usage###
 
-* With SSL lib
+* With SSL lib or HTTP client you can use provided verify_fun/3, do not forget to add `check_hostname` key to user state:
 
 ``` erlang
 
@@ -75,3 +75,6 @@ Unfortunately as you can see OTP SSL error reporting not so informative (in fact
 path_validation_alert(Reason) ->
     ?ALERT_REC(?FATAL, ?HANDSHAKE_FAILURE).
 ```
+
+* With custom verify_fun:
+Call verify_cert_hostname/2 with Certificate and Hostname.
