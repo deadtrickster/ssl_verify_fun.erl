@@ -72,7 +72,7 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
           %% baz*.example.net and *baz.example.net and b*z.example.net would
           %% be taken to match baz1.example.net and foobaz.example.net and
           %% buzz.example.net, respectively
-          case_insensitive_match(AfterW, string:substr(Pattern, (length(Pattern) - length(AfterW)), length(AfterW))),
+          case_insensitive_match(AfterW, string:substr(Pattern, (length(Pattern) - length(AfterW) + 1), length(AfterW))) andalso
           case_insensitive_match(BeforeW, string:substr(Pattern, 1, length(BeforeW)));
         false -> false
       end
