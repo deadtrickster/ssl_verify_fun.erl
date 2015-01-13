@@ -9,7 +9,6 @@
                   stdlib,
                   ssl
                  ]},
-  {mod, { ssl_verify_hostname_app, []}},
   {env, []}
  ]}.
 
