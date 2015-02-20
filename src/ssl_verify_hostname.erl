@@ -6,7 +6,6 @@
 
 -module(ssl_verify_hostname).
 -include_lib("public_key/include/public_key.hrl").
--include_lib("ssl/src/ssl_alert.hrl").
 
 
 -export([verify_fun/3, verify_cert_hostname/2]).
