@@ -57,9 +57,22 @@ extract_cn2([_|Rest]) ->
 extract_cn2([]) ->
   {error, no_common_name}.
 
+extensions_list(E) ->
+  case E of
+    asn1_NOVALUE -> [];
+    _ -> E
+  end.
+
+select_extension(Id, Extensions) ->
+  Matching = [Extension || #'Extension'{extnID = ExtId} = Extension <- Extensions, ExtId =:= Id],
+  case Matching of
+    [] -> undefined;
+    [H|_] -> H
+  end.
+
 extract_dns_names(TBSCert)->
-  Extensions = pubkey_cert:extensions_list(TBSCert#'OTPTBSCertificate'.extensions),
-  AltSubject = pubkey_cert:select_extension(?'id-ce-subjectAltName', Extensions),
+  Extensions = extensions_list(TBSCert#'OTPTBSCertificate'.extensions),
+  AltSubject = select_extension(?'id-ce-subjectAltName', Extensions),
   case AltSubject of
     undefined ->
       [];
