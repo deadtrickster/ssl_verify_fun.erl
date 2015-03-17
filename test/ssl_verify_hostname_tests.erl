@@ -54,7 +54,7 @@ google_cert() ->
   load_cert("google.der").
 
 load_cert(Cert) ->
-  {ok, Bin} = file:read_file("../test/" ++ Cert),
+  {ok, Bin} = file:read_file("../test/certs/" ++ Cert),
   public_key:pkix_decode_cert(Bin, otp).
 
 google_cert_dns_wildcard() ->
