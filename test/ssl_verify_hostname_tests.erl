@@ -40,6 +40,16 @@ verify_hostname_fail_test_ () ->
           ],
   [{string:join([I, R]," : "), fun() -> ?assertNot(ssl_verify_hostname:try_match_hostname(I, R)) end} || {I, R} <- Tests].
 
+
+% Certs generate via:
+% actual cert content dumped via:
+% ssl:connect("google.co.uk", 443, [{verify_fun, {fun(C, E, State) -> io:format(user, "C: ~p~n", [C]), {valid, state} end, state}}])
+% then we write them to der via:
+% C = {..}.
+% B = public_key:pkix_encode('OTPCertificate', C, 'otp').
+% file:write_file("google_teletex.der", B).
+
+
 google_cert() ->
   load_cert("google.der").
 
@@ -60,7 +70,7 @@ google_cert_printable_string() ->
 
 google_cert_teletex_string() ->
   load_cert("google_teletex.der").
-  
+
 verify_google_cert_test () ->
   ?assertEqual({valid, "google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert(), valid_peer, [{check_hostname, "google.co.uk"}])).
 
