@@ -41,4 +41,51 @@ verify_hostname_fail_test_ () ->
   [{string:join([I, R]," : "), fun() -> ?assertNot(ssl_verify_hostname:try_match_hostname(I, R)) end} || {I, R} <- Tests].
 
 
+% Certs generate via:
+% actual cert content dumped via:
+% ssl:connect("google.co.uk", 443, [{verify_fun, {fun(C, E, State) -> io:format(user, "C: ~p~n", [C]), {valid, state} end, state}}])
+% then we write them to der via:
+% C = {..}.
+% B = public_key:pkix_encode('OTPCertificate', C, 'otp').
+% file:write_file("google_teletex.der", B).
+
+
+google_cert() ->
+  load_cert("google.der").
+
+load_cert(Cert) ->
+  {ok, Bin} = file:read_file("../test/" ++ Cert),
+  public_key:pkix_decode_cert(Bin, otp).
+
+google_cert_dns_wildcard() ->
+  load_cert("google_wildcard.der").
+
+
+google_cert_without_dns() ->
+  load_cert("google_nodns.der").
+
+
+google_cert_printable_string() ->
+  load_cert("google_printable.der").
+
+google_cert_teletex_string() ->
+  load_cert("google_teletex.der").
+
+verify_google_cert_test () ->
+  ?assertEqual({valid, "google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert(), valid_peer, [{check_hostname, "google.co.uk"}])).
+
+verify_google_cert_dns_wildcard_test () ->
+  ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_dns_wildcard(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
+
+
+verify_google_cert_without_dns_test () ->
+  ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_without_dns(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
+
+verify_google_cert_printable_string_test() ->
+  ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_printable_string(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
+
+verify_google_cert_teletex_string_test() ->
+  ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_teletex_string(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
+
+
 %%TODO: add certificate tests
