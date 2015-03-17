@@ -55,7 +55,12 @@ google_cert_without_dns() ->
   load_cert("google_nodns.der").
 
 
+google_cert_printable_string() ->
+  load_cert("google_printable.der").
 
+google_cert_teletex_string() ->
+  load_cert("google_teletex.der").
+  
 verify_google_cert_test () ->
   ?assertEqual({valid, "google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert(), valid_peer, [{check_hostname, "google.co.uk"}])).
 
@@ -66,6 +71,11 @@ verify_google_cert_dns_wildcard_test () ->
 verify_google_cert_without_dns_test () ->
   ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_without_dns(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
 
+verify_google_cert_printable_string_test() ->
+  ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_printable_string(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
+
+verify_google_cert_teletex_string_test() ->
+  ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_teletex_string(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
 
 
 %%TODO: add certificate tests

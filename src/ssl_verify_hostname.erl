@@ -29,7 +29,12 @@ get_string({bmpString, Str}) ->
 get_string({utf8String, Str}) ->
   {ok, decode(Str, utf8)};
 get_string({printableString, Str}) ->
-  ascii_only(Str);
+  case is_printable_string(Str) of
+    true ->
+      {ok, Str};
+    _ ->
+      {error, invalid}
+  end;
 get_string({teletexString, Str}) ->
   ascii_only(Str);
 get_string(_) ->
@@ -42,6 +47,35 @@ ascii_only(Str) ->
     false ->
       {error, invalid}
   end.
+
+is_printable_string(Str) ->
+  lists:all(fun is_printable/1, Str).
+
+is_printable(Ch) when Ch >= $a andalso Ch =< 'z' ->
+  true;
+is_printable(Ch) when Ch >= $A andalso Ch =< 'Z' ->
+  true;
+is_printable(Ch) when Ch >= $0 andalso Ch =< '9' ->
+  true;
+is_printable(Ch) when Ch >= $\\ andalso Ch =< $) ->
+  true;
+is_printable(Ch) when Ch >= $+ andalso Ch =< $/ ->
+  true;
+is_printable($ ) ->
+  true;
+is_printable($:) ->
+  true;
+is_printable($=) ->
+  true;
+is_printable($?) ->
+  true;
+% as with go we add * to printable string (http://golang.org/src/encoding/asn1/asn1.go)
+is_printable($*) ->
+  true;
+is_printable(_) ->
+  false.
+
+
 
 is_ascii(Str) ->
   lists:all(fun(C) -> C >= 16#20 andalso C =< 16#7E end, Str).
