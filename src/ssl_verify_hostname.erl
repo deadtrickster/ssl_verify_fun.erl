@@ -23,9 +23,9 @@ decode(X, Charset) ->
 % the possible implications of mismatched chars
 
 get_string({universalString, Str}) ->
-  {ok, decode(Str, utf32)};
+  {ok, Str};
 get_string({bmpString, Str}) ->
-  {ok, decode(Str, utf16)};
+  {ok, Str};
 get_string({utf8String, Str}) ->
   {ok, decode(Str, utf8)};
 get_string({printableString, Str}) ->
