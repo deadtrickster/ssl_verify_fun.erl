@@ -2,7 +2,7 @@
 %%%
 %%% MIT License
 %%%
-%%% Copyright (c) 2014, Ilya Khaprov <ilya.khaprov@publitechs.com>
+%%% Copyright (c) 2014,2015 Ilya Khaprov <ilya.khaprov@publitechs.com>
 
 -module(ssl_verify_hostname).
 -include_lib("public_key/include/public_key.hrl").
@@ -18,9 +18,9 @@ decode(X, Charset) ->
     _ -> {error, invalid}
   end.
 
-% i'm not sure if bmpString is exactly utf16...
-% or if universalString is exactly utf32 or
-% the possible implications of mismatched chars
+%% i'm not sure if bmpString is exactly utf16...
+%% or if universalString is exactly utf32 or
+%% the possible implications of mismatched chars
 
 get_string({universalString, Str}) ->
   {ok, decode(Str, utf32)};
@@ -69,7 +69,7 @@ is_printable($=) ->
   true;
 is_printable($?) ->
   true;
-% as with go we add * to printable string (http://golang.org/src/encoding/asn1/asn1.go)
+%% as with go we add * to printable string (http://golang.org/src/encoding/asn1/asn1.go)
 is_printable($*) ->
   true;
 is_printable(_) ->
@@ -152,7 +152,7 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
           %% be taken to match baz1.example.net and foobaz.example.net and
           %% buzz.example.net, respectively
           case_insensitive_match(AfterW, string:substr(Pattern, (length(Pattern) - length(AfterW) + 1), length(AfterW))) andalso
-          case_insensitive_match(BeforeW, string:substr(Pattern, 1, length(BeforeW)));
+            case_insensitive_match(BeforeW, string:substr(Pattern, 1, length(BeforeW)));
         false -> false
       end
   end.

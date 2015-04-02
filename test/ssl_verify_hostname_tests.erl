@@ -2,14 +2,14 @@
 %%%
 %%% MIT License
 %%%
-%%% Copyright (c) 2014, Ilya Khaprov <ilya.khaprov@publitechs.com>
+%%% Copyright (c) 2014,2015 Ilya Khaprov <ilya.khaprov@publitechs.com>
 
 -module(ssl_verify_hostname_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
 verify_hostname_success_test_ () ->
-           %% presented identifier, reference identifier, validation and parsing result
+  %% presented identifier, reference identifier, validation and parsing result
   Tests = [
            {"www.example.com", "WWW.eXamPle.CoM", false}, %% case insensitive match
            {"www.example.com.", "www.example.com", false}, %% ignore trailing dots (prevenet *.com. matches)
@@ -26,7 +26,7 @@ verify_hostname_success_test_ () ->
 
 
 verify_hostname_fail_test_ () ->
-           %% presented identifier, reference identifier
+  %% presented identifier, reference identifier
   Tests = [
            {"*.com", "eXamPle.CoM"},
            {".com.", "example.com."},
@@ -41,13 +41,13 @@ verify_hostname_fail_test_ () ->
   [{string:join([I, R]," : "), fun() -> ?assertNot(ssl_verify_hostname:try_match_hostname(I, R)) end} || {I, R} <- Tests].
 
 
-% Certs generate via:
-% actual cert content dumped via:
-% ssl:connect("google.co.uk", 443, [{verify_fun, {fun(C, E, State) -> io:format(user, "C: ~p~n", [C]), {valid, state} end, state}}])
-% then we write them to der via:
-% C = {..}.
-% B = public_key:pkix_encode('OTPCertificate', C, 'otp').
-% file:write_file("google_teletex.der", B).
+%% Certs generated via:
+%% actual cert content dumped via:
+%% ssl:connect("google.co.uk", 443, [{verify_fun, {fun(C, E, State) -> io:format(user, "C: ~p~n", [C]), {valid, state} end, state}}])
+%% then we write them to der via:
+%% C = {..}.
+%% B = public_key:pkix_encode('OTPCertificate', C, 'otp').
+%% file:write_file("google_teletex.der", B).
 
 
 google_cert() ->

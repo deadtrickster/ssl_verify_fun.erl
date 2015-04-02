@@ -1,7 +1,7 @@
 {application, ssl_verify_hostname,
  [
   {description, ""},
-  {vsn, "1.0.0"},
+  {vsn, "1.0.4"},
   {modules, [ssl_verify_hostname]},
   {registered, []},
   {applications, [
