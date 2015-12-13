@@ -57,7 +57,7 @@ is_printable(Ch) when Ch >= $A andalso Ch =< $Z ->
   true;
 is_printable(Ch) when Ch >= $0 andalso Ch =< $9 ->
   true;
-is_printable(Ch) when Ch >= $\\ andalso Ch =< $) ->
+is_printable(Ch) when Ch >= $' andalso Ch =< $) ->
   true;
 is_printable(Ch) when Ch >= $+ andalso Ch =< $/ ->
   true;
