@@ -51,11 +51,11 @@ ascii_only(Str) ->
 is_printable_string(Str) ->
   lists:all(fun is_printable/1, Str).
 
-is_printable(Ch) when Ch >= $a andalso Ch =< 'z' ->
+is_printable(Ch) when Ch >= $a andalso Ch =< $z ->
   true;
-is_printable(Ch) when Ch >= $A andalso Ch =< 'Z' ->
+is_printable(Ch) when Ch >= $A andalso Ch =< $Z ->
   true;
-is_printable(Ch) when Ch >= $0 andalso Ch =< '9' ->
+is_printable(Ch) when Ch >= $0 andalso Ch =< $9 ->
   true;
 is_printable(Ch) when Ch >= $\\ andalso Ch =< $) ->
   true;
