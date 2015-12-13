@@ -57,9 +57,7 @@ is_printable(Ch) when Ch >= $A andalso Ch =< $Z ->
   true;
 is_printable(Ch) when Ch >= $0 andalso Ch =< $9 ->
   true;
-is_printable(Ch) when Ch >= $' andalso Ch =< $) ->
-  true;
-is_printable(Ch) when Ch >= $+ andalso Ch =< $/ ->
+is_printable(Ch) when Ch >= $' andalso Ch =< $/ -> %% include $* to allow wildcards
   true;
 is_printable($ ) ->
   true;
@@ -69,13 +67,8 @@ is_printable($=) ->
   true;
 is_printable($?) ->
   true;
-%% as with go we add * to printable string (http://golang.org/src/encoding/asn1/asn1.go)
-is_printable($*) ->
-  true;
 is_printable(_) ->
   false.
-
-
 
 is_ascii(Str) ->
   lists:all(fun(C) -> C >= 16#20 andalso C =< 16#7E end, Str).
