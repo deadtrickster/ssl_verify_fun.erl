@@ -3,7 +3,7 @@ defmodule Hackney.Mixfile do
 
   def project do
     [app: :ssl_verify_hostname,
-     version: "1.0.5",
+     version: "1.0.6",
      description: description,
      package: package,
      fetch: fetch]
@@ -16,7 +16,7 @@ defmodule Hackney.Mixfile do
   end
 
   defp package do
-    [contributors: ["Ilya Khaprov"],
+    [maintainers: ["Ilya Khaprov"],
      licenses: ["MIT"],
      links: %{"GitHub" => "https://github.com/deadtrickster/ssl_verify_hostname.erl"},
      files: ["src", "README.md", "LICENSE", "Makefile"]]
@@ -25,6 +25,6 @@ defmodule Hackney.Mixfile do
   defp fetch do
     [scm: :git,
      url: "git://github.com/deadtrickster/ssl_verify_hostname.erl.git",
-     tag: "1.0.5"]
+     tag: "1.0.6"]
   end
 end
