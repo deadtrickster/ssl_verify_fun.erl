@@ -4,7 +4,7 @@
 
 ```erlang
 3> ssl:connect("github.com", 443, [{verify_fun, {fun ssl_verify_fingerprint:verify_fun/3, [{check_fingerprint, {sha, "A0C4A74600EDA72DC0BECB9A8CB607CA58EE745E"} }]}}, {verify, verify_none}]).   
-qwe: "A0C4A74600EDA72DC0BECB9A8CB607CA58EE745E"{ok,{sslsocket,{gen_tcp,#Port<0.1499>,tls_connection,
+{ok,{sslsocket,{gen_tcp,#Port<0.1499>,tls_connection,
                         undefined},
                <0.53.0>}}
 4> ssl:connect("google.com", 443, [{verify_fun, {fun ssl_verify_fingerprint:verify_fun/3, [{check_fingerprint, {sha, "A0C4A74600EDA72DC0BECB9A8CB607CA58EE745E"} }]}}, {verify, verify_none}]).
