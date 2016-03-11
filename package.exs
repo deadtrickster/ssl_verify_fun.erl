@@ -1,9 +1,9 @@
-defmodule Hackney.Mixfile do
+defmodule SSLVerifyFun.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :ssl_verify_hostname,
-     version: "1.0.6",
+    [app: :ssl_verify_fun,
+     version: "1.0.8",
      description: description,
      package: package,
      fetch: fetch]
@@ -11,20 +11,20 @@ defmodule Hackney.Mixfile do
 
   defp description do
     """
-    Hostname verification library for Erlang
+    SSL verification functions for Erlang
     """
   end
 
   defp package do
     [maintainers: ["Ilya Khaprov"],
      licenses: ["MIT"],
-     links: %{"GitHub" => "https://github.com/deadtrickster/ssl_verify_hostname.erl"},
+     links: %{"GitHub" => "https://github.com/deadtrickster/ssl_verify_fun.erl"},
      files: ["src", "README.md", "LICENSE", "Makefile"]]
   end
 
   defp fetch do
     [scm: :git,
-     url: "git://github.com/deadtrickster/ssl_verify_hostname.erl.git",
-     tag: "1.0.6"]
+     url: "git://github.com/deadtrickster/ssl_verify_fun.erl.git",
+     tag: "1.0.8"]
   end
 end
