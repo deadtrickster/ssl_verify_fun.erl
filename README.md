@@ -1,20 +1,29 @@
-##Hostname verification library for Erlang [![Build Status](https://travis-ci.org/deadtrickster/ssl_verify_hostname.erl.svg?branch=master)](https://travis-ci.org/deadtrickster/ssl_verify_hostname.erl)
+# SSL verification for Erlang [![Build Status](https://travis-ci.org/deadtrickster/ssl_verify_hostname.erl.svg?branch=master)](https://travis-ci.org/deadtrickster/ssl_verify_hostname.erl)
 
-## NEW: Certificate fingerprint verification added
+## Certificate fingerprint validation
 
 ```erlang
-3> ssl:connect("github.com", 443, [{verify_fun, {fun ssl_verify_fingerprint:verify_fun/3, [{check_fingerprint, {sha, "D79F076110B39293E349AC89845B0380C19E2F8B"} }]}}, {verify, verify_none}]).   
+1> ssl:connect("github.com", 443, [{verify_fun,
+				 {fun ssl_verify_fingerprint:verify_fun/3,
+				  [{check_fingerprint, {sha, "D79F076110B39293E349AC89845B0380C19E2F8B"} }]}},
+				{verify, verify_none}]).   
 {ok,{sslsocket,{gen_tcp,#Port<0.1499>,tls_connection,
                         undefined},
                <0.53.0>}}
-4> ssl:connect("google.com", 443, [{verify_fun, {fun ssl_verify_fingerprint:verify_fun/3, [{check_fingerprint, {sha, "D79F076110B39293E349AC89845B0380C19E2F8B"} }]}}, {verify, verify_none}]).
+               
+2> ssl:connect("google.com", 443, [{verify_fun,
+				 {fun ssl_verify_fingerprint:verify_fun/3,
+				  [{check_fingerprint, {sha, "D79F076110B39293E349AC89845B0380C19E2F8B"} }]}},
+				{verify, verify_none}]).
 =ERROR REPORT==== 10-Mar-2016::16:13:54 ===
 SSL: certify: ssl_handshake.erl:1492:Fatal error: handshake failure
 {error,{tls_alert,"handshake failure"}}
 
 ```
 
-### Excerpt from RFC(http://tools.ietf.org/html/rfc6125)###
+## Hostname validation
+
+Excerpt from RFC (http://tools.ietf.org/html/rfc6125)
 
 
 ```
