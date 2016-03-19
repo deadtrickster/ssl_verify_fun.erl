@@ -9,7 +9,7 @@
 
 bin_to_hexstr(Bin) ->
   lists:flatten([io_lib:format("~2.16.0B", [X]) ||
-    X <- binary_to_list(Bin)]).
+                  X <- binary_to_list(Bin)]).
 
 
 hexstr_to_bin(S) when is_list(S) and (length(S) rem 2 =:= 0) ->
@@ -24,45 +24,45 @@ hexstr_to_bin([X,Y|T], Acc) ->
 
 %% plain - just plain bytes
 pk_info_to_pk(plain, PK) when is_binary(PK) ->
-		PK;
+  PK;
 pk_info_to_pk(plain, PK) ->
-		hexstr_to_bin(PK);
+  hexstr_to_bin(PK);
 %% base64 - pk encoded using base64 (same as openssl does)
 pk_info_to_pk(base64, PK) when is_binary(PK) ->
-		base64:decode(PK);
+  base64:decode(PK);
 pk_info_to_pk(base64, PK) when is_list(PK) and (length(PK) rem 4 =:= 0)->
-		base64:decode(PK);
+  base64:decode(PK);
 %% pk is hashed, do not care about exact algorithm here
 pk_info_to_pk(_, PKHash) when is_binary(PKHash) ->
-		PKHash;
+  PKHash;
 pk_info_to_pk(_, PKHash) ->
-		hexstr_to_bin(PKHash).
+  hexstr_to_bin(PKHash).
 
 try_match_encoded_pk(plain, Encoded, Encoded) ->
-	{valid, Encoded};
+  {valid, Encoded};
 try_match_encoded_pk(plain, _Encoded, PK) ->
-	{fail, PK};
+  {fail, PK};
 try_match_encoded_pk(base64, Encoded, Encoded) ->
-	{valid, Encoded};
+  {valid, Encoded};
 try_match_encoded_pk(base64, _Encoded, PK) ->
-	{fail, PK};
+  {fail, PK};
 try_match_encoded_pk(HashAlgorithm, Encoded, PK) ->
-	Hash = crypto:hash(HashAlgorithm, Encoded),
+  Hash = crypto:hash(HashAlgorithm, Encoded),
   case Hash of
     PK ->
       {valid, PK};
     _ ->
-			{fail, PK}
+      {fail, PK}
   end.
 
 verify_cert_pk(Cert, PK, CheckPKAlgorithm) ->
-	TBSCert = Cert#'OTPCertificate'.tbsCertificate,
-	PublicKeyInfo = TBSCert#'OTPTBSCertificate'.subjectPublicKeyInfo,
-	PublicKey = PublicKeyInfo#'OTPSubjectPublicKeyInfo'.subjectPublicKey,
-	%% pem_entry_encode can't encode ec algothims
-	{'SubjectPublicKeyInfo', Encoded, not_encrypted} = public_key:pem_entry_encode('SubjectPublicKeyInfo', PublicKey),
+  TBSCert = Cert#'OTPCertificate'.tbsCertificate,
+  PublicKeyInfo = TBSCert#'OTPTBSCertificate'.subjectPublicKeyInfo,
+  PublicKey = PublicKeyInfo#'OTPSubjectPublicKeyInfo'.subjectPublicKey,
+  %% pem_entry_encode can't encode ec algothims
+  {'SubjectPublicKeyInfo', Encoded, not_encrypted} = public_key:pem_entry_encode('SubjectPublicKeyInfo', PublicKey),
 
-	try_match_encoded_pk(CheckPKAlgorithm, Encoded, PK).
+  try_match_encoded_pk(CheckPKAlgorithm, Encoded, PK).
 
 verify_cert_pk(Cert, CheckPK) ->
   {CheckPKAlgorithm, PK} = CheckPK,

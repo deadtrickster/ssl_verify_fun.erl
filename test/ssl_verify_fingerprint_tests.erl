@@ -20,4 +20,3 @@ verify_google_cert_fingerprint_test () ->
   ?assertEqual({valid, "7FD053FA7F4E6E20DAD4C1262A545782A222A0BC"}, ssl_verify_fingerprint:verify_cert_fingerprint(Cert, {sha, "7FD053FA7F4E6E20DAD4C1262A545782A222A0BC"})),
   ?assertEqual({fail, "7FD053FA7F4E6E20DAD4C1262A545782A222A0BC"}, ssl_verify_fingerprint:verify_cert_fingerprint(Cert, {sha, "7FD053FA7F4E6C"})),
   ?assertEqual({fail, invalid_fingerprint}, ssl_verify_fingerprint:verify_cert_fingerprint(Cert, {sha, "7FD053FA7F4E6"})).
-	       

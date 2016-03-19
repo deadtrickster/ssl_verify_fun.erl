@@ -36,7 +36,7 @@ verify_cert_fingerprint(Cert, CheckFingerprint) ->
     invalid -> {fail, invalid_fingerprint};
     FingerprintB -> verify_cert_fingerprint(Cert, FingerprintB, FingerprintAlgorithm)
   end.
-  
+
 
 verify_fun(_,{bad_cert, _}, UserState) ->
   {valid, UserState};
@@ -46,7 +46,7 @@ verify_fun(_, valid, UserState) ->
   {valid, UserState};
 verify_fun(Cert, valid_peer, UserState) ->
   CheckFingerprint = proplists:get_value(check_fingerprint, UserState),
-  if 
+  if
     CheckFingerprint /= undefined ->
       verify_cert_fingerprint(Cert, CheckFingerprint);
     true -> {valid, UserState}
