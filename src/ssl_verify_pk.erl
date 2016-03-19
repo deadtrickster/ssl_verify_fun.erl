@@ -59,7 +59,7 @@ verify_cert_pk(Cert, PK, CheckPKAlgorithm) ->
   TBSCert = Cert#'OTPCertificate'.tbsCertificate,
   PublicKeyInfo = TBSCert#'OTPTBSCertificate'.subjectPublicKeyInfo,
   PublicKey = PublicKeyInfo#'OTPSubjectPublicKeyInfo'.subjectPublicKey,
-  %% pem_entry_encode can't encode ec algothims
+  %% pem_entry_encode can't encode ec algorithms
   {'SubjectPublicKeyInfo', Encoded, not_encrypted} = public_key:pem_entry_encode('SubjectPublicKeyInfo', PublicKey),
 
   try_match_encoded_pk(CheckPKAlgorithm, Encoded, PK).
