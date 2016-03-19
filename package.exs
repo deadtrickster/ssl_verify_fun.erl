@@ -19,12 +19,6 @@ defmodule SSLVerifyFun.Mixfile do
     [maintainers: ["Ilya Khaprov"],
      licenses: ["MIT"],
      links: %{"GitHub" => "https://github.com/deadtrickster/ssl_verify_fun.erl"},
-     files: ["src", "README.md", "LICENSE", "Makefile"]]
-  end
-
-  defp fetch do
-    [scm: :git,
-     url: "git://github.com/deadtrickster/ssl_verify_fun.erl.git",
-     tag: "1.0.8"]
+     files: ["src", "README.md", "LICENSE", "Makefile", "rebar.config"]]
   end
 end
