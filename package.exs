@@ -5,8 +5,7 @@ defmodule SSLVerifyFun.Mixfile do
     [app: :ssl_verify_fun,
      version: "1.0.9",
      description: description,
-     package: package,
-     fetch: fetch]
+     package: package]
   end
 
   defp description do
