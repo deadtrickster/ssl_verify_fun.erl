@@ -2,7 +2,7 @@
  [
   {description, ""},
   {vsn, "1.1.0"},
-  {modules, [ssl_verify_hostname, ssl_verify_fingerprint]},
+  {modules, [ssl_verify_hostname, ssl_verify_fingerprint, ssl_verify_pk]},
   {registered, []},
   {applications, [
                   kernel,
