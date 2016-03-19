@@ -1,5 +1,9 @@
 # SSL verification for Erlang [![Build Status](https://travis-ci.org/deadtrickster/ssl_verify_fun.erl.svg?branch=master)](https://travis-ci.org/deadtrickster/ssl_verify_fun.erl)
 
+* [Fingerprint validation](#certificate-fingerprint-validation--pinning)
+* [Public Key validation](#public-key-validation--pinning)
+* [Hostname validation](#hostname-validation)
+
 ## Certificate fingerprint validation / pinning
 
 ```erlang
