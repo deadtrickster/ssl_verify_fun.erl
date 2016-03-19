@@ -1,6 +1,6 @@
 REBAR:=rebar
 
-.PHONY: all erl test clean doc 
+.PHONY: all erl test clean doc hexp
 
 all: erl
 
@@ -14,6 +14,9 @@ test: all
 clean:
 	$(REBAR) clean
 	-rm -rvf deps ebin doc .eunit
+
+hexp:
+	MIX_EXS=package.exs mix hex.publish
 
 doc:
 	$(REBAR) doc
