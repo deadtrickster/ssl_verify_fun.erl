@@ -45,7 +45,7 @@ try_match_encoded_pk(HashAlgorithm, Encoded, PK) ->
     PK ->
       {valid, PK};
     _ ->
-      {fail, PK}
+      {fail, pk_no_match}
   end.
 
 verify_cert_pk(Cert, PK, CheckPKAlgorithm) ->

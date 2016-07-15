@@ -21,7 +21,7 @@ verify_cert_fingerprint(Cert, Fingerprint, FingerprintAlgorithm) ->
     Fingerprint ->
       {valid, bin_to_hexstr(Fingerprint)};
     _ ->
-      {fail, bin_to_hexstr(Hash)}
+      {fail, fingerprint_no_match}
   end.
 
 verify_cert_fingerprint(Cert, CheckFingerprint) ->
