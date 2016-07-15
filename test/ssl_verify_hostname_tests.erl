@@ -2,7 +2,7 @@
 %%%
 %%% MIT License
 %%%
-%%% Copyright (c) 2014,2015 Ilya Khaprov <ilya.khaprov@publitechs.com>
+%%% Copyright (c) 2014-2016 Ilya Khaprov <ilya.khaprov@publitechs.com>
 
 -module(ssl_verify_hostname_tests).
 
@@ -54,7 +54,7 @@ google_cert() ->
   load_cert("google.der").
 
 load_cert(Cert) ->
-  {ok, Bin} = file:read_file("../test/certs/" ++ Cert),
+  {ok, Bin} = file:read_file("test/certs/" ++ Cert),
   public_key:pkix_decode_cert(Bin, otp).
 
 google_cert_dns_wildcard() ->
@@ -84,14 +84,11 @@ verify_google_cert_test () ->
 verify_google_cert_dns_wildcard_test () ->
   ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_dns_wildcard(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
 
-
 verify_google_cert_without_dns_test () ->
   ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_without_dns(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
 
 verify_google_cert_printable_string_test() ->
   ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_printable_string(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
-
-
 
 verify_google_cert_teletex_string_test() ->
   ?assertEqual({valid, "www.google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_teletex_string(), valid_peer, [{check_hostname, "www.google.co.uk"}])).
@@ -101,6 +98,3 @@ verify_google_cert_bmp_string_test() ->
 
 verify_google_cert_universal_string_test() ->
   ?assertEqual({valid, "google.co.uk"}, ssl_verify_hostname:verify_fun(google_cert_universal_string(), valid_peer, [{check_hostname, "google.co.uk"}])).
-
-
-%%TODO: add certificate tests

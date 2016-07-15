@@ -6,7 +6,7 @@ deps
 erl_crash.dump
 .eunit
 .rebar
-
+_build
 #emacs stuff
 *~
 \#*

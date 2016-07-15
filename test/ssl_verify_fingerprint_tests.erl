@@ -12,7 +12,7 @@ google_cert() ->
   load_cert("google.der").
 
 load_cert(Cert) ->
-  {ok, Bin} = file:read_file("../test/certs/" ++ Cert),
+  {ok, Bin} = file:read_file("test/certs/" ++ Cert),
   public_key:pkix_decode_cert(Bin, otp).
 
 verify_google_cert_fingerprint_test () ->

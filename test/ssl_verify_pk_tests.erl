@@ -6,24 +6,16 @@
 
 -module(ssl_verify_pk_tests).
 
+-import(ssl_verify_util, [hexstr_to_bin/1]).
+
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("public_key/include/public_key.hrl").
 
 google_cert() ->
   load_cert("google.der").
 
-hexstr_to_bin(S) when is_list(S) and (length(S) rem 2 =:= 0) ->
-  hexstr_to_bin(S, []);
-hexstr_to_bin(_) ->
-  invalid.
-hexstr_to_bin([], Acc) ->
-  list_to_binary(lists:reverse(Acc));
-hexstr_to_bin([X,Y|T], Acc) ->
-  {ok, [V], []} = io_lib:fread("~16u", [X,Y]),
-  hexstr_to_bin(T, [V | Acc]).
-
 load_cert(Cert) ->
-  {ok, Bin} = file:read_file("../test/certs/" ++ Cert),
+  {ok, Bin} = file:read_file("test/certs/" ++ Cert),
   public_key:pkix_decode_cert(Bin, otp).
 
 verify_google_cert_pk_plain_test () ->
