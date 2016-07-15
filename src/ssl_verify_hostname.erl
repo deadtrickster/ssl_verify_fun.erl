@@ -2,7 +2,7 @@
 %%%
 %%% MIT License
 %%%
-%%% Copyright (c) 2014,2015 Ilya Khaprov <ilya.khaprov@publitechs.com>
+%%% Copyright (c) 2014-2016 Ilya Khaprov <ilya.khaprov@publitechs.com>
 
 -module(ssl_verify_hostname).
 -include_lib("public_key/include/public_key.hrl").
