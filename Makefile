@@ -1,19 +1,18 @@
-REBAR:=rebar
+REBAR:=./rebar3
 
 .PHONY: all erl test clean doc hexp
 
 all: erl
 
 erl:
-	$(REBAR) get-deps compile
+	$(REBAR)  compile
 
 test: all
-	@mkdir -p .eunit
-	$(REBAR) skip_deps=true eunit
+	$(REBAR) eunit
 
 clean:
 	$(REBAR) clean
-	-rm -rvf deps ebin doc .eunit
+	-rm -rvf deps ebin doc .eunit _build
 
 hexp:
 	MIX_EXS=package.exs mix hex.publish
