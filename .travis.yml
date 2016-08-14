@@ -13,4 +13,4 @@ otp_release:
   - R15B03
   - R15B02
 
-script: "./rebar3 eunit"
+script: "./elvis rock && ./rebar3 do dialyzer, eunit"
