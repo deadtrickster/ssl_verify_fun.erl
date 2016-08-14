@@ -7,7 +7,8 @@
 -module(ssl_verify_fun_cert_helpers).
 
 -export([extract_dns_names/1,
-         extract_cn/1]).
+         extract_cn/1,
+         extract_pk/1]).
 
 -include_lib("public_key/include/public_key.hrl").
 
@@ -33,6 +34,12 @@ extract_cn(Cert) ->
   TBSCert = Cert#'OTPCertificate'.tbsCertificate,
   {rdnSequence, List} = TBSCert#'OTPTBSCertificate'.subject,
   extract_cn2(List).
+
+-spec extract_pk(Cert :: #'OTPCertificate'{}) -> {error, no_common_name} | #'SubjectPublicKeyInfo'{}.
+extract_pk(Cert) ->
+  TBSCert = Cert#'OTPCertificate'.tbsCertificate,
+  PublicKeyInfo = TBSCert#'OTPTBSCertificate'.subjectPublicKeyInfo,
+  PublicKeyInfo#'OTPSubjectPublicKeyInfo'.subjectPublicKey.
 
 %%====================================================================
 %% Private Parts
