@@ -43,7 +43,7 @@ verify_fun(Cert, valid_peer, UserState) ->
     _ -> verify_cert_hostname(Cert, CheckHostname)
   end.
 
--spec verify_cert_hostname(Cert :: #'OTPCertificate'{}, hostname()) ->
+-spec verify_cert_hostname(Cert :: #'OTPCertificate'{}, Hostname :: hostname()) ->
                               {valid, hostname()} | {fail, term()}.
 verify_cert_hostname(Cert, Hostname) ->
   %% first try match dns altnames if any
