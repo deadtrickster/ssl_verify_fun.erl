@@ -20,7 +20,7 @@ verify_hostname_success_test_ () ->
            {"baz*.example.com", "baz1.example.com", {"baz", ".example.com", false}}
           ],
   [{string:join([I, R]," : "), fun() ->
-                                   ?assertMatch(V, ssl_verify_hostname:validate_and_parse_wildcard_identifier(I, R)),
+                                   ?assertMatch(V, ssl_verify_hostname:parse_and_validate_wildcard_identifier(I, R)),
                                    ?assert(ssl_verify_hostname:try_match_hostname(I, R))
                                end} || {I, R, V} <- Tests].
 

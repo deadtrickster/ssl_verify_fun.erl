@@ -65,7 +65,7 @@ extract_dns_names_from_alt_names([ExtValue | Rest], Acc) ->
 extract_dns_names_from_alt_names([], Acc) ->
   Acc.
 
-extract_cn2([[#'AttributeTypeAndValue'{type={2,5,4,3},
+extract_cn2([[#'AttributeTypeAndValue'{type={2, 5, 4, 3},
                                        value=CN}]|_]) ->
   ssl_verify_fun_encodings:get_string(CN);
 extract_cn2([_|Rest]) ->

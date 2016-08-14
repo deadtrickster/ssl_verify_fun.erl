@@ -53,7 +53,8 @@ verify_cert_pk(Cert, PK, CheckPKAlgorithm) ->
   PublicKeyInfo = TBSCert#'OTPTBSCertificate'.subjectPublicKeyInfo,
   PublicKey = PublicKeyInfo#'OTPSubjectPublicKeyInfo'.subjectPublicKey,
   %% pem_entry_encode can't encode ec algorithms
-  {'SubjectPublicKeyInfo', Encoded, not_encrypted} = public_key:pem_entry_encode('SubjectPublicKeyInfo', PublicKey),
+  {'SubjectPublicKeyInfo', Encoded, not_encrypted} =
+    public_key:pem_entry_encode('SubjectPublicKeyInfo', PublicKey),
 
   try_match_encoded_pk(CheckPKAlgorithm, Encoded, PK).
 
@@ -64,20 +65,20 @@ verify_cert_pk(Cert, CheckPK) ->
     PKB -> verify_cert_pk(Cert, PKB, CheckPKAlgorithm)
   end.
 
--spec verify_fun(Cert :: #'OTPCertificate'{}, Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
-                                                       {extension, #'Extension'{}}, InitialUserState :: term()) ->
+-spec verify_fun(Cert :: #'OTPCertificate'{},
+                 Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
+                          {extension, #'Extension'{}}, InitialUserState :: term()) ->
                     {valid, UserState :: term()} | {valid_peer, UserState :: term()} |
                     {fail, Reason :: term()} | {unknown, UserState :: term()}.
-verify_fun(_,{bad_cert, _}, UserState) ->
+verify_fun(_, {bad_cert, _}, UserState) ->
   {valid, UserState};
-verify_fun(_,{extension, _}, UserState) ->
+verify_fun(_, {extension, _}, UserState) ->
   {unknown, UserState};
 verify_fun(_, valid, UserState) ->
   {valid, UserState};
 verify_fun(Cert, valid_peer, UserState) ->
   CheckPK = proplists:get_value(check_pk, UserState),
-  if
-    CheckPK /= undefined ->
-      verify_cert_pk(Cert, CheckPK);
-    true -> {valid, UserState}
+  case CheckPK of
+    undefined -> {valid, UserState};
+    _ -> verify_cert_pk(Cert, CheckPK)
   end.

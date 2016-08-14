@@ -33,20 +33,20 @@ verify_cert_fingerprint(Cert, CheckFingerprint) ->
     FingerprintB -> verify_cert_fingerprint(Cert, FingerprintB, FingerprintAlgorithm)
   end.
 
--spec verify_fun(Cert :: #'OTPCertificate'{}, Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
-                                                       {extension, #'Extension'{}}, InitialUserState :: term()) ->
+-spec verify_fun(Cert :: #'OTPCertificate'{},
+                 Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
+                          {extension, #'Extension'{}}, InitialUserState :: term()) ->
                     {valid, UserState :: term()} | {valid_peer, UserState :: term()} |
                     {fail, Reason :: term()} | {unknown, UserState :: term()}.
-verify_fun(_,{bad_cert, _}, UserState) ->
+verify_fun(_, {bad_cert, _}, UserState) ->
   {valid, UserState};
-verify_fun(_,{extension, _}, UserState) ->
+verify_fun(_, {extension, _}, UserState) ->
   {unknown, UserState};
 verify_fun(_, valid, UserState) ->
   {valid, UserState};
 verify_fun(Cert, valid_peer, UserState) ->
   CheckFingerprint = proplists:get_value(check_fingerprint, UserState),
-  if
-    CheckFingerprint /= undefined ->
-      verify_cert_fingerprint(Cert, CheckFingerprint);
-    true -> {valid, UserState}
+  case CheckFingerprint of
+    undefined -> {valid, UserState};
+    _ ->  verify_cert_fingerprint(Cert, CheckFingerprint)
   end.
