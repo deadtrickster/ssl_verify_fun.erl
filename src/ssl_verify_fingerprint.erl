@@ -14,6 +14,8 @@
 -export([verify_cert_fingerprint/2]).
 -endif.
 
+-include_lib("public_key/include/public_key.hrl").
+
 verify_cert_fingerprint(Cert, Fingerprint, FingerprintAlgorithm) ->
   CertBinary = public_key:pkix_encode('OTPCertificate', Cert, 'otp'),
   Hash = crypto:hash(FingerprintAlgorithm, CertBinary),
@@ -31,7 +33,10 @@ verify_cert_fingerprint(Cert, CheckFingerprint) ->
     FingerprintB -> verify_cert_fingerprint(Cert, FingerprintB, FingerprintAlgorithm)
   end.
 
-
+-spec verify_fun(Cert :: #'OTPCertificate'{}, Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
+                                                       {extension, #'Extension'{}}, InitialUserState :: term()) ->
+                    {valid, UserState :: term()} | {valid_peer, UserState :: term()} |
+                    {fail, Reason :: term()} | {unknown, UserState :: term()}.
 verify_fun(_,{bad_cert, _}, UserState) ->
   {valid, UserState};
 verify_fun(_,{extension, _}, UserState) ->

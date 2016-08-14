@@ -64,7 +64,10 @@ verify_cert_pk(Cert, CheckPK) ->
     PKB -> verify_cert_pk(Cert, PKB, CheckPKAlgorithm)
   end.
 
-
+-spec verify_fun(Cert :: #'OTPCertificate'{}, Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
+                                                       {extension, #'Extension'{}}, InitialUserState :: term()) ->
+                    {valid, UserState :: term()} | {valid_peer, UserState :: term()} |
+                    {fail, Reason :: term()} | {unknown, UserState :: term()}.
 verify_fun(_,{bad_cert, _}, UserState) ->
   {valid, UserState};
 verify_fun(_,{extension, _}, UserState) ->

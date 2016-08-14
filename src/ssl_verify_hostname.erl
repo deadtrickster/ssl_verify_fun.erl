@@ -5,118 +5,95 @@
 %%% Copyright (c) 2014-2016 Ilya Khaprov <ilya.khaprov@publitechs.com>
 
 -module(ssl_verify_hostname).
--include_lib("public_key/include/public_key.hrl").
 
+-export([verify_fun/3,
+         verify_cert_hostname/2]).
 
--export([verify_fun/3, verify_cert_hostname/2]).
 -ifdef(TEST).
 -export([validate_and_parse_wildcard_identifier/2, try_match_hostname/2]).
 -endif.
-decode(X, Charset) ->
-  case unicode:characters_to_list(X, Charset) of
-    Decoded when is_list(Decoded) -> Decoded;
-    _ -> {error, invalid}
+
+-include_lib("public_key/include/public_key.hrl").
+
+-export_type([hostname/0,
+              user_state/0]).
+
+-type hostname() :: nonempty_string() | binary().
+-type user_state() :: [{check_hostname, Hostname :: hostname()}] | [].
+
+%%====================================================================
+%% Public API
+%%====================================================================
+
+-spec verify_fun(Cert :: #'OTPCertificate'{}, Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
+                                                       {extension, #'Extension'{}}, InitialUserState :: term()) ->
+                    {valid, UserState :: term()} | {valid_peer, UserState :: user_state()} |
+                    {fail, Reason :: term()} | {unknown, UserState :: term()}.
+verify_fun(_,{bad_cert, _} = Reason, _) ->
+  {fail, Reason};
+verify_fun(_,{extension, _}, UserState) ->
+  {unknown, UserState};
+verify_fun(_, valid, UserState) ->
+  {valid, UserState};
+verify_fun(Cert, valid_peer, UserState) ->
+  CheckHostname = proplists:get_value(check_hostname, UserState),
+  if
+    CheckHostname /= undefined ->
+      verify_cert_hostname(Cert, CheckHostname);
+    true -> {valid, UserState}
   end.
 
-%% i'm not sure if bmpString is exactly utf16...
-%% or if universalString is exactly utf32 or
-%% the possible implications of mismatched chars
-
-get_string({universalString, Str}) ->
-  {ok, Str};
-get_string({bmpString, Str}) ->
-  {ok, Str};
-get_string({utf8String, Str}) ->
-  {ok, decode(Str, utf8)};
-get_string({printableString, Str}) ->
-  case is_printable_string(Str) of
+-spec verify_cert_hostname(Cert :: #'OTPCertificate'{}, hostname()) ->
+                              {valid, hostname()} | {fail, term()}.
+verify_cert_hostname(Cert, Hostname) ->
+  %% first try match dns altnames if any
+  DNSNames = ssl_verify_fun_cert_helpers:extract_dns_names(Cert),
+  DNSNameMatched = try_match_hostnames(DNSNames, Hostname),
+  case maybe_check_subject_cn(DNSNames, DNSNameMatched, Cert, Hostname) of
     true ->
-      {ok, Str};
+      {valid, Hostname};
+    Reason ->
+      {fail, Reason}
+  end.
+
+%%====================================================================
+%% Private Parts
+%%====================================================================
+
+-spec try_match_hostnames([string()], Hostname :: string()) -> boolean().
+try_match_hostnames([DNSName| REST], Hostname) ->
+  case try_match_hostname(DNSName, Hostname) of
+    true ->
+      true;
     _ ->
-      {error, invalid}
+      try_match_hostnames(REST, Hostname)
   end;
-get_string({teletexString, Str}) ->
-  ascii_only(Str);
-get_string(_) ->
-  {error, invalid}.
-
-ascii_only(Str) ->
-  case is_ascii(Str) of
-    true ->
-      {ok, Str};
-    false ->
-      {error, invalid}
-  end.
-
-is_printable_string(Str) ->
-  lists:all(fun is_printable/1, Str).
-
-is_printable(Ch) when Ch >= $a andalso Ch =< $z ->
-  true;
-is_printable(Ch) when Ch >= $A andalso Ch =< $Z ->
-  true;
-is_printable(Ch) when Ch >= $0 andalso Ch =< $9 ->
-  true;
-is_printable(Ch) when Ch >= $' andalso Ch =< $/ -> %% include $* to allow wildcards
-  true;
-is_printable($ ) ->
-  true;
-is_printable($:) ->
-  true;
-is_printable($=) ->
-  true;
-is_printable($?) ->
-  true;
-is_printable(_) ->
+try_match_hostnames([], _Hostname) ->
   false.
 
-is_ascii(Str) ->
-  lists:all(fun(C) -> C >= 16#20 andalso C =< 16#7E end, Str).
-
-%% extract cn from subject
-extract_cn({rdnSequence, List}) ->
-  extract_cn2(List).
-extract_cn2([[#'AttributeTypeAndValue'{type={2,5,4,3},
-                                       value=CN}]|_]) ->
-  get_string(CN);
-extract_cn2([_|Rest]) ->
-  extract_cn2(Rest);
-extract_cn2([]) ->
-  {error, no_common_name}.
-
-extensions_list(E) ->
-  case E of
-    asn1_NOVALUE -> [];
-    _ -> E
+-spec maybe_check_subject_cn(DNSNames :: [string()],
+                             DNSNameMatched :: boolean(),
+                             Cert :: #'OTPCertificate'{},
+                             Hostname :: string()) -> boolean().
+maybe_check_subject_cn(DNSNames, DNSNameMatched, Cert, Hostname) ->
+  case DNSNameMatched of
+    true -> true;
+    false ->
+      case DNSNames of
+        [_|_] ->
+          unable_to_match_altnames;
+        [] ->
+          case ssl_verify_fun_cert_helpers:extract_cn(Cert) of
+            {ok, String} ->
+              case try_match_hostname(String, Hostname) of
+                true -> true;
+                false -> unable_to_match_common_name
+              end;
+            _ ->
+              unable_to_decode_common_name
+          end
+      end
   end.
-
-select_extension(Id, Extensions) ->
-  Matching = [Extension || #'Extension'{extnID = ExtId} = Extension <- Extensions, ExtId =:= Id],
-  case Matching of
-    [] -> undefined;
-    [H|_] -> H
-  end.
-
-extract_dns_names(TBSCert)->
-  Extensions = extensions_list(TBSCert#'OTPTBSCertificate'.extensions),
-  AltSubject = select_extension(?'id-ce-subjectAltName', Extensions),
-  case AltSubject of
-    undefined ->
-      [];
-    _ ->
-      extract_dns_names_from_alt_names(AltSubject#'Extension'.extnValue, [])
-  end.
-
-extract_dns_names_from_alt_names([ExtValue | Rest], Acc) ->
-  Acc1 = case ExtValue of
-           {dNSName, DNSName} ->
-             [unicode:characters_to_list(DNSName) | Acc];
-           _ ->
-             Acc
-         end,
-  extract_dns_names_from_alt_names(Rest, Acc1);
-extract_dns_names_from_alt_names([], Acc) ->
-  Acc.
 
 case_insensitive_match(Str1, Str2) ->
   string:to_lower(Str1) == string:to_lower(Str2).
@@ -219,60 +196,4 @@ try_match_hostname(Identifier0, Hostname0) ->
           try_match_wildcard(BeforeWString, AfterWString, SingleCharW, Hostname);
         _ -> false
       end
-  end.
-
-try_match_hostnames([DNSName| REST], Hostname) ->
-  case try_match_hostname(DNSName, Hostname) of
-    true ->
-      true;
-    _ ->
-      try_match_hostnames(REST, Hostname)
-  end;
-try_match_hostnames([], _Hostname) ->
-  false.
-
-maybe_check_subject_cn(DNSNames, DNSNameMatched, TBSCert, Hostname) ->
-  case DNSNameMatched of
-    true -> true;
-    false ->
-      case DNSNames of
-        [_|_] ->
-          unable_to_match_altnames;
-        [] ->
-          case extract_cn(TBSCert#'OTPTBSCertificate'.subject) of
-            {ok, String} ->
-              case try_match_hostname(String, Hostname) of
-                true -> true;
-                false -> unable_to_match_common_name
-              end;
-            _ ->
-              unable_to_decode_common_name
-          end
-      end
-  end.
-
-verify_cert_hostname(Cert, Hostname) ->
-  TBSCert = Cert#'OTPCertificate'.tbsCertificate,
-  %% first try match dns altnames if any
-  DNSNames = extract_dns_names(TBSCert),
-  DNSNameMatched = try_match_hostnames(DNSNames, Hostname),
-  case maybe_check_subject_cn(DNSNames, DNSNameMatched, TBSCert, Hostname) of
-    true ->
-      {valid, Hostname};
-    Reason ->
-      {fail, Reason}
-  end.
-
-verify_fun(_,{bad_cert, _} = Reason, _) ->
-  {fail, Reason};
-verify_fun(_,{extension, _}, UserState) ->
-  {unknown, UserState};
-verify_fun(_, valid, UserState) ->
-  {valid, UserState};
-verify_fun(Cert, valid_peer, UserState) ->
-  CheckHostname = proplists:get_value(check_hostname, UserState),
-  if
-    CheckHostname /= undefined ->
-      verify_cert_hostname(Cert, CheckHostname);
-    true -> {valid, UserState}
   end.
