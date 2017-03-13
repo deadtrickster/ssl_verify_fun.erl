@@ -32,13 +32,20 @@
                           {extension, #'Extension'{}}, InitialUserState :: term()) ->
                     {valid, UserState :: term()} | {valid_peer, UserState :: user_state()} |
                     {fail, Reason :: term()} | {unknown, UserState :: term()}.
-verify_fun(_, {bad_cert, _}, UserState) ->
+verify_fun(Cert, {bad_cert, selfsigned_peer}, UserState) ->
+  maybe_verify_cert_pk(Cert, UserState);
+verify_fun(_Cert, {bad_cert, unknown_ca}, UserState) ->
   {valid, UserState};
+verify_fun(_, {bad_cert, _} = Reason, _UserState) ->
+  {fail, Reason};
 verify_fun(_, {extension, _}, UserState) ->
   {unknown, UserState};
 verify_fun(_, valid, UserState) ->
   {valid, UserState};
 verify_fun(Cert, valid_peer, UserState) ->
+  maybe_verify_cert_pk(Cert, UserState).
+
+maybe_verify_cert_pk(Cert, UserState) ->
   PK = proplists:get_value(check_pk, UserState),
   case PK of
     undefined -> {valid, UserState};
