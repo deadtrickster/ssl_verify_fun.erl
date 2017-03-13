@@ -8,13 +8,16 @@
 * [Public Key validation](#public-key-validation--pinning)
 * [Hostname validation](#hostname-validation)
 
+Note: all examples use `{reuse_sessions, false}` to make sure session won't be reused and `ssl:connect` will give you different result when changing fingerprints/hostnames, etc. Perhaps this should be removed in production.
+
 ## Certificate fingerprint validation / pinning
 
 ```erlang
 1> ssl:connect("github.com", 443, [{verify_fun,
 				 {fun ssl_verify_fingerprint:verify_fun/3,
 				  [{check_fingerprint, {sha, "D79F076110B39293E349AC89845B0380C19E2F8B"} }]}},
-				{verify, verify_none}]).   
+				{verify, verify_none},
+				{reuse_sessions, false}]).   
 {ok,{sslsocket,{gen_tcp,#Port<0.1499>,tls_connection,
                         undefined},
                <0.53.0>}}
@@ -22,7 +25,8 @@
 2> ssl:connect("google.com", 443, [{verify_fun,
 				 {fun ssl_verify_fingerprint:verify_fun/3,
 				  [{check_fingerprint, {sha, "D79F076110B39293E349AC89845B0380C19E2F8B"} }]}},
-				{verify, verify_none}]).
+				{verify, verify_none},
+				{reuse_sessions, false}]).
 =ERROR REPORT==== 10-Mar-2016::16:13:54 ===
 SSL: certify: ssl_handshake.erl:1492:Fatal error: handshake failure
 {error,{tls_alert,"handshake failure"}}
@@ -59,7 +63,8 @@ ssl:connect("github.com", 443, [{verify_fun,
                                               "X9mNahXtXxRpwZnBiUjw36PgN+s9GLWGrafd02T0ux9Yzd5ezkMxukqEAQ7AKIIi"++
                                               "jvaWPAJbK/52XLhIy2vpGNylyni/DQD18bBPT+ZG1uv0QQP9LuY/joO+FKDOTler"++
                                               "4wIDAQAB" } }]}},
-                                {verify, verify_none}]).      
+                                {verify, verify_none},
+                                {reuse_sessions, false}]).      
 {ok,{sslsocket,{gen_tcp,#Port<0.2167>,tls_connection,
                         undefined},
                <0.60.0>}}
@@ -74,7 +79,8 @@ ssl:connect("github.com", 443, [{verify_fun,
                                 {fun ssl_verify_pk:verify_fun/3,
                                  [{check_pk, {sha,
                                               "D4EE9D2A6712B3614C272D158B04FCC8CA08A0B6" } }]}},
-                                {verify, verify_none}]).
+                                {verify, verify_none},
+                                {reuse_sessions, false}]).
 {ok,{sslsocket,{gen_tcp,#Port<0.2744>,tls_connection,
 	                      undefined},
                <0.73.0>}}
@@ -136,13 +142,26 @@ Excerpt from RFC (http://tools.ietf.org/html/rfc6125)
 ``` erlang
 
 CACertFile = "..../my-ca.pem".
-ssl:connect("tv.eurosport.com", 443, [{verify_fun, {fun ssl_verify_hostname:verify_fun/3, [{check_hostname, "tv.eurosport.com"}]}}, {cacertfile, CACertFile }, {server_name_indication, "tv.eurosport.com"}, {verify, verify_peer}, {depth, 99}]).
+ssl:connect("tv.eurosport.com", 443, [{verify_fun,
+                                       {fun ssl_verify_hostname:verify_fun/3,
+                                        [{check_hostname, "tv.eurosport.com"}]}},
+                                      {cacertfile, CACertFile },
+                                      {server_name_indication, "tv.eurosport.com"},
+                                      {reuse_sessions, false},
+                                      {verify, verify_peer},
+                                      {depth, 99}]).
 
 =ERROR REPORT==== 9-Oct-2014::03:34:41 ===
 SSL: certify: ..../ssl_handshake.erl:1403:Fatal error: handshake failure
 {error,{tls_alert,"handshake failure"}}
 
-ssl:connect("tv.eurosport.com", 443, [{verify_fun, {fun ssl_verify_hostname:verify_fun/3, []}}, {cacertfile, CACertFile }, {server_name_indication, "tv.eurosport.com"}, {verify, verify_peer}, {depth, 99}]).
+ssl:connect("tv.eurosport.com", 443, [{verify_fun,
+                                       {fun ssl_verify_hostname:verify_fun/3, []}},
+                                      {cacertfile, CACertFile },
+                                      {server_name_indication, "tv.eurosport.com"},
+                                      {reuse_sessions, false},
+                                      {verify, verify_peer},
+                                      {depth, 99}]).
 
 {ok,{sslsocket,{gen_tcp,#Port<0.1565>,tls_connection,
                         undefined},
