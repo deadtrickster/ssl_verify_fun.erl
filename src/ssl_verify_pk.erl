@@ -11,10 +11,6 @@
 
 -import(ssl_verify_util, [hexstr_to_bin/1]).
 
--ifdef(TEST).
--export([verify_cert_pk/2]).
--endif.
-
 -include_lib("public_key/include/public_key.hrl").
 
 -export_type([pk/0,
