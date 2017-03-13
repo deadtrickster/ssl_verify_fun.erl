@@ -10,7 +10,15 @@
 
 Note: all examples use `{reuse_sessions, false}` to make sure session won't be reused and `ssl:connect` will give you different result when changing fingerprints/hostnames, etc. Perhaps this should be removed in production.
 
+## Resources
+
+- [Certificate and Public Key pinning](https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning)
+- [Pinning Cheatsheet](https://www.owasp.org/index.php/Pinning_Cheat_Sheet)
+- [RFC 6125](http://tools.ietf.org/html/rfc6125)
+
 ## Certificate fingerprint validation / pinning
+
+[OWASP link](https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning#Hashing)
 
 ```erlang
 1> ssl:connect("github.com", 443, [{verify_fun,
@@ -34,6 +42,9 @@ SSL: certify: ssl_handshake.erl:1492:Fatal error: handshake failure
 ```
 
 ## Public Key validation / pinning
+
+[OWASP link](https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning#Public_Key)
+
 We can pin public key using its hex or base64 representation as well as fingerprint
 
 Using github.com as example lets extract public key
