@@ -99,13 +99,15 @@ try_match_common_name(Cert, Hostname) ->
   end.
 
 case_insensitive_match(Str1, Str2) ->
-  string:to_lower(Str1) == string:to_lower(Str2).
+  ssl_verify_string:to_lower(Str1) == ssl_verify_string:to_lower(Str2).
 
 wildcard_not_in_a_label(BeforeW, AfterWString) ->
-  AfterDotPos = string:chr(AfterWString, $.),
-  (string:str(BeforeW, "xn--") == 0)
+  AfterDotPos = ssl_verify_string:chr(AfterWString, $.),
+  (ssl_verify_string:str(BeforeW, "xn--") == 0)
     andalso
-      (0 == (string:str(string:substr(AfterWString, 1, AfterDotPos), "xn--"))).
+      (0 == (ssl_verify_string:str(
+               ssl_verify_string:substr(AfterWString, 1, AfterDotPos), "xn--")
+            )).
 
 try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
   %% Compare AfterW part with end of pattern with length (length AfterW)
@@ -116,33 +118,34 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
   %% if i'm correct if it wasn't the only character
   %% we can match like this: *o.example.com = bar.foo.example.com
   %% but this is prohibited anyway thanks to check_wildcard_in_leftmost_label
-  FirstPatternDotPos = string:chr(Pattern, $.),
+  FirstPatternDotPos = ssl_verify_string:chr(Pattern, $.),
   case SingleCharW of
     true ->
       %% only compare againts whole left-most label in pattern
-      case_insensitive_match(AfterW, string:substr(Pattern, FirstPatternDotPos));
+      case_insensitive_match(AfterW, ssl_verify_string:substr(Pattern, FirstPatternDotPos));
     false ->
       case wildcard_not_in_a_label(BeforeW, AfterW) of
         true ->
           %% baz*.example.net and *baz.example.net and b*z.example.net would
           %% be taken to match baz1.example.net and foobaz.example.net and
           %% buzz.example.net, respectively
-          case_insensitive_match(AfterW, string:substr(Pattern,
-                                                       (length(Pattern) - length(AfterW) + 1),
-                                                       length(AfterW)))
+          case_insensitive_match(AfterW,
+                                 ssl_verify_string:substr(Pattern,
+                                                          (length(Pattern) - length(AfterW) + 1),
+                                                          length(AfterW)))
             andalso
-            case_insensitive_match(BeforeW, string:substr(Pattern, 1, length(BeforeW)));
+            case_insensitive_match(BeforeW, ssl_verify_string:substr(Pattern, 1, length(BeforeW)));
         false -> false
       end
   end.
 
 check_two_labels_after_wildcard(String) ->
   %% at least two dots(in fact labels since we remove trailing dot first) after wildcard
-  case string:chr(String, $.) of
+  case ssl_verify_string:chr(String, $.) of
     0 ->
       false;
     FirstDotAfterWildcardPos ->
-      case string:chr(string:substr(String, 1 + FirstDotAfterWildcardPos), $.) of
+      case ssl_verify_string:chr(ssl_verify_string:substr(String, 1 + FirstDotAfterWildcardPos), $.) of
         0 ->
           false;
         _ ->
@@ -152,7 +155,7 @@ check_two_labels_after_wildcard(String) ->
 
 check_wildcard_in_leftmost_label(Identifier, WildcardPos) ->
   %% only allow *.example.com, not foo.*.example.com
-  case string:chr(Identifier, $.) of
+  case ssl_verify_string:chr(Identifier, $.) of
     0 ->
       false;
     DotPos ->
@@ -164,7 +167,7 @@ check_wildcard_in_leftmost_label(Identifier, WildcardPos) ->
 
 parse_and_validate_wildcard_identifier(Identifier, Hostname) ->
   %% try wildcard match
-  case string:chr(Identifier, $*) of
+  case ssl_verify_string:chr(Identifier, $*) of
     0 -> %% no wildcard, return false
       false;
     WildcardPos ->
@@ -177,10 +180,10 @@ validate_wildcard_identifier(Identifier, Hostname, WildcardPos) ->
     _ ->
       case check_wildcard_in_leftmost_label(Identifier, WildcardPos) of
         true ->
-          AfterWString = string:substr(Identifier, WildcardPos + 1),
-          BeforeWString = string:substr(Identifier, 1,  WildcardPos - 1),
+          AfterWString = ssl_verify_string:substr(Identifier, WildcardPos + 1),
+          BeforeWString = ssl_verify_string:substr(Identifier, 1,  WildcardPos - 1),
           %% only one wildcard allowed
-          case string:chr(AfterWString, $*) of
+          case ssl_verify_string:chr(AfterWString, $*) of
             0 ->
               case check_two_labels_after_wildcard(AfterWString) of %% at least two labels after wildcard
                 false -> false;
@@ -197,8 +200,8 @@ validate_wildcard_identifier(Identifier, Hostname, WildcardPos) ->
   end.
 
 try_match_hostname(Identifier0, Hostname0) ->
-  Identifier = string:strip(Identifier0, right, $.), %% what about *.com.??
-  Hostname = string:strip(Hostname0, right, $.),
+  Identifier = ssl_verify_string:strip(Identifier0, right, $.), %% what about *.com.??
+  Hostname = ssl_verify_string:strip(Hostname0, right, $.),
   case case_insensitive_match(Identifier, Hostname) of
     true ->
       true;
