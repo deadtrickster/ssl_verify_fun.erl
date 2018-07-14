@@ -29,7 +29,7 @@ extract_dns_names(Cert)->
   end.
 
 %% extract cn from subject
--spec extract_cn(Cert :: #'OTPCertificate'{}) -> {error, no_common_name} | string().
+-spec extract_cn(Cert :: #'OTPCertificate'{}) -> {error, no_common_name} | {ok, string()} | {error, invalid}.
 extract_cn(Cert) ->
   TBSCert = Cert#'OTPCertificate'.tbsCertificate,
   {rdnSequence, List} = TBSCert#'OTPTBSCertificate'.subject,

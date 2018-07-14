@@ -74,7 +74,7 @@ try_match_hostnames([], _Hostname) ->
 -spec maybe_check_subject_cn(DNSNames :: [string()],
                              DNSNameMatched :: boolean(),
                              Cert :: #'OTPCertificate'{},
-                             Hostname :: string()) -> boolean().
+                             Hostname :: string()) -> true | unable_to_match_altnames | unable_to_match_common_name | unable_to_decode_common_name.
 maybe_check_subject_cn(DNSNames, DNSNameMatched, Cert, Hostname) ->
   case DNSNameMatched of
     true -> true;
