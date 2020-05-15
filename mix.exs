@@ -4,7 +4,7 @@ defmodule SSLVerifyFun.Mixfile do
   def project do
     [app: :ssl_verify_fun,
      language: :erlang,
-     version: "1.1.5",
+     version: "1.1.6",
      description: description(),
      package: package()]
   end
