@@ -2,7 +2,7 @@
 
  [![Hex.pm](https://img.shields.io/hexpm/v/ssl_verify_fun.svg?maxAge=2592000)](https://hex.pm/packages/ssl_verify_fun)
  [![Hex.pm](https://img.shields.io/hexpm/dw/ssl_verify_fun.svg?maxAge=2592000)](https://hex.pm/packages/ssl_verify_fun)
- [![Build Status](https://travis-ci.org/deadtrickster/ssl_verify_fun.erl.svg?branch=master)](https://travis-ci.org/deadtrickster/ssl_verify_fun.erl)
+ [![Build Status](https://github.com/deadtrickster/ssl_verify_fun.erl/workflows/build/badge.svg)](https://github.com/deadtrickster/ssl_verify_fun.erl)
 
 * [Fingerprint validation](#certificate-fingerprint-validation--pinning)
 * [Public Key validation](#public-key-validation--pinning)

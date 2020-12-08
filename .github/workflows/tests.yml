@@ -1,5 +1,5 @@
 ---
-name: CI for ssl_verify_fun.erl
+name: build
 on:
   push:
     branches:
