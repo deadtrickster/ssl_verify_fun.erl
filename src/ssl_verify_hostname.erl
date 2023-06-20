@@ -121,7 +121,7 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
   FirstPatternDotPos = ssl_verify_string:chr(Pattern, $.),
   case SingleCharW of
     true ->
-      %% only compare againts whole left-most label in pattern
+      %% only compare against whole left-most label in pattern
       case_insensitive_match(AfterW, ssl_verify_string:substr(Pattern, FirstPatternDotPos));
     false ->
       case wildcard_not_in_a_label(BeforeW, AfterW) of
