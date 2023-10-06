@@ -27,8 +27,8 @@
 -spec verify_fun(Cert :: #'OTPCertificate'{},
                  Event :: {bad_cert, Reason :: atom() | {revoked, atom()}} |
                           {extension, #'Extension'{}}, InitialUserState :: term()) ->
-                    {valid, UserState :: term()} | {valid_peer, UserState :: user_state()} |
-                    {fail, Reason :: term()} | {unknown, UserState :: term()}.
+                    {valid, ValidUserState :: term()} | {valid_peer, UserState :: user_state()} |
+                    {fail, Reason :: term()} | {unknown, UnknownUserState :: term()}.
 verify_fun(_, {extension, _}, UserState) ->
   {unknown, UserState};
 verify_fun(Cert, _, UserState) ->
