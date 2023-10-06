@@ -30,8 +30,8 @@
                           {extension, #'Extension'{}} |
                           valid | valid_peer,
                  InitialUserState :: term()) ->
-                    {valid, UserState :: term()} | {valid_peer, UserState :: user_state()} |
-                    {fail, Reason :: term()} | {unknown, UserState :: term()}.
+                    {valid, ValidUserState :: term()} | {valid_peer, UserState :: user_state()} |
+                    {fail, Reason :: term()} | {unknown, UnknownUserState :: term()}.
 verify_fun(_, {bad_cert, _} = Reason, _) ->
   {fail, Reason};
 verify_fun(_, {extension, _}, UserState) ->
