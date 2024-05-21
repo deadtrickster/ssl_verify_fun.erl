@@ -9,6 +9,7 @@
                   stdlib,
                   ssl
                  ]},
-  {env, []}
+  {env, []},
+  {licenses, ["MIT"]}
  ]}.
 
