@@ -37,7 +37,13 @@ verify_hostname_fail_test_ () ->
            {"*fooxn--bar.example.com", "bazfooxn--bar.example.com"},
            {"*.akamaized.net", "tv.eurosport.com"},
            {"a*c.example.com", "abcd.example.com"},
-           {"*baz.example.com", "foobuzz.example.com"}
+           {"*baz.example.com", "foobuzz.example.com"},
+           %% partial-label wildcard must not match across label boundaries (RFC 6125 6.4.3)
+           {"a*.example.com", "a.evil.example.com"},
+           {"a*.example.com", "a.b.c.example.com"},
+           {"*o.example.com", "bar.foo.example.com"},
+           {"b*z.example.com", "b.z.example.com"},
+           {"b*z.example.com", "bu.zz.example.com"}
           ],
   [{lists:append(join(" : ", [I, R])),
     fun() -> ?assertNot(ssl_verify_hostname:try_match_hostname(I, R)) end} || {I, R} <- Tests].
