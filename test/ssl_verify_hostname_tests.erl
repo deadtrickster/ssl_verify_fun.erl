@@ -17,7 +17,8 @@ verify_hostname_success_test_ () ->
            {"*.example.com", "www.example.com", {[], ".example.com", true}},         %% always matching wildcards
            {"b*z.example.com", "buzz.example.com", {"b", "z.example.com", false}},
            {"*baz.example.com", "foobaz.example.com", {[], "baz.example.com", false}},
-           {"baz*.example.com", "baz1.example.com", {"baz", ".example.com", false}}
+           {"baz*.example.com", "baz1.example.com", {"baz", ".example.com", false}},
+           {"192.168.1.1", "192.168.1.1", false} %% exact IP literal match still works
           ],
   [{lists:append(join(" : ", [I, R])),
     fun() ->
@@ -37,7 +38,19 @@ verify_hostname_fail_test_ () ->
            {"*fooxn--bar.example.com", "bazfooxn--bar.example.com"},
            {"*.akamaized.net", "tv.eurosport.com"},
            {"a*c.example.com", "abcd.example.com"},
-           {"*baz.example.com", "foobuzz.example.com"}
+           {"*baz.example.com", "foobuzz.example.com"},
+           %% partial-label wildcard must not match across label boundaries (RFC 6125 6.4.3)
+           {"a*.example.com", "a.evil.example.com"},
+           {"a*.example.com", "a.b.c.example.com"},
+           {"*o.example.com", "bar.foo.example.com"},
+           {"b*z.example.com", "b.z.example.com"},
+           {"b*z.example.com", "bu.zz.example.com"},
+           %% wildcards must not match IP address literals
+           {"*.168.1.1", "192.168.1.1"},
+           {"1*.168.1.1", "192.168.1.1"},
+           {"*2.168.1.1", "192.168.1.1"},
+           {"*.0.0.1", "127.0.0.1"},
+           {"*.168.1.1", "::ffff:192.168.1.1"}
           ],
   [{lists:append(join(" : ", [I, R])),
     fun() -> ?assertNot(ssl_verify_hostname:try_match_hostname(I, R)) end} || {I, R} <- Tests].

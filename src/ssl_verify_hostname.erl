@@ -117,9 +117,10 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
   %% doesn't matter since parts after Wildcard should match unconditionally.
   %% However if Wildcard was the only character in left-most label we can't
   %% match this *.example.com and bar.foo.example.com
-  %% if i'm correct if it wasn't the only character
-  %% we can match like this: *o.example.com = bar.foo.example.com
-  %% but this is prohibited anyway thanks to check_wildcard_in_leftmost_label
+  %% Likewise, a partial-label wildcard such as *o.example.com must not match
+  %% bar.foo.example.com: RFC 6125 Section 6.4.3 only allows the wildcard to
+  %% match within the left-most label, so the characters it consumes in the
+  %% presented hostname must not contain a dot.
   FirstPatternDotPos = ssl_verify_string:chr(Pattern, $.),
   case SingleCharW of
     true ->
@@ -131,12 +132,20 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
           %% baz*.example.net and *baz.example.net and b*z.example.net would
           %% be taken to match baz1.example.net and foobaz.example.net and
           %% buzz.example.net, respectively
+          BeforeWLen = length(BeforeW),
+          AfterWLen = length(AfterW),
+          %% the part of the pattern consumed by the wildcard
+          WildcardSpan = ssl_verify_string:substr(Pattern,
+                                                  BeforeWLen + 1,
+                                                  length(Pattern) - BeforeWLen - AfterWLen),
           case_insensitive_match(AfterW,
                                  ssl_verify_string:substr(Pattern,
-                                                          (length(Pattern) - length(AfterW) + 1),
-                                                          length(AfterW)))
+                                                          (length(Pattern) - AfterWLen + 1),
+                                                          AfterWLen))
             andalso
-            case_insensitive_match(BeforeW, ssl_verify_string:substr(Pattern, 1, length(BeforeW)));
+            case_insensitive_match(BeforeW, ssl_verify_string:substr(Pattern, 1, BeforeWLen))
+            andalso
+            ssl_verify_string:chr(WildcardSpan, $.) == 0;
         false -> false
       end
   end.
@@ -208,9 +217,21 @@ try_match_hostname(Identifier0, Hostname0) ->
     true ->
       true;
     false ->
-      case parse_and_validate_wildcard_identifier(Identifier, Hostname) of
-        {BeforeWString, AfterWString, SingleCharW} ->
-          try_match_wildcard(BeforeWString, AfterWString, SingleCharW, Hostname);
-        _ -> false
+      %% a literal IP address is an IP-ID, not a DNS-ID, and must never be
+      %% matched by a wildcard (RFC 6125 Section 1.7.2, RFC 9110 Section 4.3.4)
+      case is_ip_address(Hostname) of
+        true -> false;
+        false ->
+          case parse_and_validate_wildcard_identifier(Identifier, Hostname) of
+            {BeforeWString, AfterWString, SingleCharW} ->
+              try_match_wildcard(BeforeWString, AfterWString, SingleCharW, Hostname);
+            _ -> false
+          end
       end
+  end.
+
+is_ip_address(Hostname) ->
+  case inet:parse_address(Hostname) of
+    {ok, _} -> true;
+    {error, _} -> false
   end.
