@@ -15,8 +15,9 @@
 
 -spec decode_dns_name(term()) -> string() | {error, invalid}.
 decode_dns_name(DNSName) ->
-  %% dNSName is an IA5String (RFC 5280 Section 4.2.1.6), so a name holding
-  %% anything outside ASCII is not an identifier and must never match.
+  %% dNSName is an IA5String (RFC 5280 Section 4.2.1.6), which Section 7.2
+  %% limits to ASCII - internationalized names are stored there as ACE. A name
+  %% holding anything else is not an identifier and must never match.
   case unicode:characters_to_list(DNSName) of
     Decoded when is_list(Decoded) ->
       case ascii_only(Decoded) of

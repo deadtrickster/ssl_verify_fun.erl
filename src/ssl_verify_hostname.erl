@@ -118,10 +118,9 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
   %% doesn't matter since parts after Wildcard should match unconditionally.
   %% However if Wildcard was the only character in left-most label we can't
   %% match this *.example.com and bar.foo.example.com
-  %% Likewise, a partial-label wildcard such as *o.example.com must not match
-  %% bar.foo.example.com: RFC 6125 Section 6.4.3 only allows the wildcard to
-  %% match within the left-most label, so the characters it consumes in the
-  %% presented hostname must not contain a dot.
+  %% A partial-label wildcard such as *o.example.com must not match
+  %% bar.foo.example.com: the characters it consumes stay in the left-most
+  %% label. Stricter than RFC 6125 Section 6.4.3 rule 3, which permits them.
   FirstPatternDotPos = ssl_verify_string:chr(Pattern, $.),
   case SingleCharW of
     true ->
@@ -222,7 +221,8 @@ try_match_hostname(Identifier0, Hostname0) ->
       true;
     false ->
       %% a literal IP address is an IP-ID, not a DNS-ID, and must never be
-      %% matched by a wildcard (RFC 6125 Section 1.7.2, RFC 9110 Section 4.3.4)
+      %% matched by a wildcard (RFC 6125 Section 1.7.2, RFC 9110 Section 4.3.4,
+      %% and Section 4.3.5: an IP-ID matches only an identical iPAddress)
       case is_ip_address(Hostname) of
         true -> false;
         false ->
