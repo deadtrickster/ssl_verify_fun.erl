@@ -19,27 +19,26 @@ concurrency:
 jobs:
   ci:
     name: OTP ${{ matrix.otp }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         include:
-          - otp: '24'
-            os: ubuntu-22.04
+          # latest rebar3 does not run on OTP 25
           - otp: '25'
-            os: ubuntu-24.04
+            rebar3: '3.24.0'
           - otp: '26'
-            os: ubuntu-24.04
+            rebar3: '3'
           - otp: '27'
-            os: ubuntu-24.04
+            rebar3: '3'
           - otp: '28'
-            os: ubuntu-24.04
+            rebar3: '3'
     steps:
       - uses: actions/checkout@v5
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp }}
-          rebar3-version: '3'
+          rebar3-version: ${{ matrix.rebar3 }}
       - run: rebar3 compile
       - run: rebar3 eunit
       - run: rebar3 dialyzer
