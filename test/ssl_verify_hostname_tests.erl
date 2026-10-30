@@ -7,6 +7,7 @@
 -module(ssl_verify_hostname_tests).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("public_key/include/public_key.hrl").
 
 verify_hostname_success_test_ () ->
   %% presented identifier, reference identifier, validation and parsing result
@@ -65,6 +66,40 @@ undecodable_dns_name_never_matches_test() ->
   NonAscii = ssl_verify_fun_encodings:decode_dns_name(<<16#C3, 16#A9, "xample.com">>),
   ?assertNot(ssl_verify_hostname:try_match_hostname(NonAscii, "www.example.com")),
   ?assertEqual({error, invalid}, NonAscii).
+
+%% A malformed dNSName stays in the altname list, so the certificate cannot
+%% fall back to a subject CN that does match (RFC 6125 Section 6.4.4).
+verify_cert_malformed_dns_name_no_cn_fallback_test() ->
+  Cert = cert_with(cn("www.example.com"), [{dNSName, <<128>>}]),
+  ?assertEqual({fail, unable_to_match_altnames},
+               ssl_verify_hostname:verify_cert_hostname(Cert, "www.example.com")).
+
+%% A valid dNSName still matches when the SAN also holds an undecodable one,
+%% and it is the altname that matches, not the CN.
+verify_cert_mixed_dns_names_test() ->
+  Cert = cert_with(cn("www.example.com"),
+                   [{dNSName, <<128>>}, {dNSName, <<"other.example.com">>}]),
+  ?assertEqual({valid, "other.example.com"},
+               ssl_verify_hostname:verify_cert_hostname(Cert, "other.example.com")).
+
+%% A non-ASCII dNSName given as a list is rejected the same way, and still
+%% blocks CN fallback.
+verify_cert_non_ascii_list_dns_name_test() ->
+  Cert = cert_with(cn("www.example.com"),
+                   [{dNSName, <<"other.example.com">>}, {dNSName, [16#E9]}]),
+  ?assertEqual({fail, unable_to_match_altnames},
+               ssl_verify_hostname:verify_cert_hostname(Cert, "www.example.com")).
+
+%% Only the fields the hostname check reads; nothing here is signed.
+cert_with(RdnSequence, AltNames) ->
+  #'OTPCertificate'{
+     tbsCertificate = #'OTPTBSCertificate'{
+                         subject = {rdnSequence, RdnSequence},
+                         extensions = [#'Extension'{extnID = ?'id-ce-subjectAltName',
+                                                    extnValue = AltNames}]}}.
+
+cn(Name) ->
+  [[#'AttributeTypeAndValue'{type = ?'id-at-commonName', value = {utf8String, Name}}]].
 
 %% Certs generated via:
 %% actual cert content dumped via:
