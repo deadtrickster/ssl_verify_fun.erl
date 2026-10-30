@@ -119,8 +119,8 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
   %% However if Wildcard was the only character in left-most label we can't
   %% match this *.example.com and bar.foo.example.com
   %% A partial-label wildcard such as *o.example.com must not match
-  %% bar.foo.example.com: the characters it consumes stay in the left-most
-  %% label. Stricter than RFC 6125 Section 6.4.3 rule 3, which permits them.
+  %% bar.foo.example.com: what it consumes stays inside the left-most label
+  %% (RFC 6125 Section 6.4.3), so an identifier cannot reach a delegated label.
   FirstPatternDotPos = ssl_verify_string:chr(Pattern, $.),
   case SingleCharW of
     true ->
