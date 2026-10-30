@@ -1,4 +1,4 @@
-REBAR:=./rebar3
+REBAR?=rebar3
 
 .PHONY: all erl test clean doc hexp
 
