@@ -55,6 +55,16 @@ verify_hostname_fail_test_ () ->
   [{lists:append(join(" : ", [I, R])),
     fun() -> ?assertNot(ssl_verify_hostname:try_match_hostname(I, R)) end} || {I, R} <- Tests].
 
+undecodable_dns_name_never_matches_test() ->
+  %% <<128>> is not valid UTF-8, so decoding it yields an error tuple that used
+  %% to reach the matcher and raise function_clause in ssl_verify_string.
+  Undecodable = ssl_verify_fun_encodings:decode_dns_name(<<128>>),
+  ?assertNot(ssl_verify_hostname:try_match_hostname(Undecodable, "www.example.com")),
+  ?assertEqual({error, invalid}, Undecodable),
+  %% a well formed but non-ASCII dNSName is not IA5 either (RFC 5280 4.2.1.6)
+  NonAscii = ssl_verify_fun_encodings:decode_dns_name(<<16#C3, 16#A9, "xample.com">>),
+  ?assertNot(ssl_verify_hostname:try_match_hostname(NonAscii, "www.example.com")),
+  ?assertEqual({error, invalid}, NonAscii).
 
 %% Certs generated via:
 %% actual cert content dumped via:

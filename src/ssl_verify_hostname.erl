@@ -62,7 +62,8 @@ verify_cert_hostname(Cert, Hostname) ->
 %% Private Parts
 %%====================================================================
 
--spec try_match_hostnames([string()], Hostname :: string()) -> boolean().
+-spec try_match_hostnames([string() | {error, invalid}], Hostname :: string()) ->
+        boolean().
 try_match_hostnames([DNSName| REST], Hostname) ->
   case try_match_hostname(DNSName, Hostname) of
     true ->
@@ -73,7 +74,7 @@ try_match_hostnames([DNSName| REST], Hostname) ->
 try_match_hostnames([], _Hostname) ->
   false.
 
--spec maybe_check_subject_cn(DNSNames :: [string()],
+-spec maybe_check_subject_cn(DNSNames :: [string() | {error, invalid}],
                              DNSNameMatched :: boolean(),
                              Cert :: #'OTPCertificate'{},
                              Hostname :: string()) -> true | unable_to_match_altnames | unable_to_match_common_name | unable_to_decode_common_name.
@@ -210,6 +211,9 @@ validate_wildcard_identifier(Identifier, Hostname, WildcardPos) ->
       end
   end.
 
+try_match_hostname(Identifier, _Hostname) when not is_list(Identifier) ->
+  %% an identifier that did not decode (non-ASCII dNSName) never matches
+  false;
 try_match_hostname(Identifier0, Hostname0) ->
   Identifier = ssl_verify_string:strip(Identifier0, right, $.), %% what about *.com.??
   Hostname = ssl_verify_string:strip(Hostname0, right, $.),
