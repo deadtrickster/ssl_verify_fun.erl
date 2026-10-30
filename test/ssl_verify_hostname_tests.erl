@@ -49,7 +49,8 @@ verify_hostname_fail_test_ () ->
            {"*.168.1.1", "192.168.1.1"},
            {"1*.168.1.1", "192.168.1.1"},
            {"*2.168.1.1", "192.168.1.1"},
-           {"*.0.0.1", "127.0.0.1"}
+           {"*.0.0.1", "127.0.0.1"},
+           {"*.168.1.1", "::ffff:192.168.1.1"}
           ],
   [{lists:append(join(" : ", [I, R])),
     fun() -> ?assertNot(ssl_verify_hostname:try_match_hostname(I, R)) end} || {I, R} <- Tests].
