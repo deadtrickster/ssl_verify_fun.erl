@@ -42,3 +42,18 @@ jobs:
       - run: rebar3 compile
       - run: rebar3 eunit
       - run: rebar3 dialyzer
+  docs:
+    name: docs
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '28'
+          elixir-version: '1.20'
+      - run: mix deps.get
+      - run: mix docs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: doc
