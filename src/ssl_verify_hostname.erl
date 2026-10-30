@@ -217,9 +217,21 @@ try_match_hostname(Identifier0, Hostname0) ->
     true ->
       true;
     false ->
-      case parse_and_validate_wildcard_identifier(Identifier, Hostname) of
-        {BeforeWString, AfterWString, SingleCharW} ->
-          try_match_wildcard(BeforeWString, AfterWString, SingleCharW, Hostname);
-        _ -> false
+      %% a literal IP address is an IP-ID, not a DNS-ID, and must never be
+      %% matched by a wildcard (RFC 6125 Section 1.7.2, RFC 9110 Section 4.3.4)
+      case is_ip_address(Hostname) of
+        true -> false;
+        false ->
+          case parse_and_validate_wildcard_identifier(Identifier, Hostname) of
+            {BeforeWString, AfterWString, SingleCharW} ->
+              try_match_wildcard(BeforeWString, AfterWString, SingleCharW, Hostname);
+            _ -> false
+          end
       end
+  end.
+
+is_ip_address(Hostname) ->
+  case inet:parse_address(Hostname) of
+    {ok, _} -> true;
+    {error, _} -> false
   end.
