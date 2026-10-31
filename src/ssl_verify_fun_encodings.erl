@@ -13,14 +13,25 @@
 %% Public API
 %%====================================================================
 
--spec decode_dns_name(term()) -> string().
+-spec decode_dns_name(term()) -> string() | {error, invalid}.
 decode_dns_name(DNSName) ->
-  unicode:characters_to_list(DNSName).
+  %% dNSName is an IA5String (RFC 5280 Section 4.2.1.6), which Section 7.2
+  %% limits to ASCII - internationalized names are stored there as ACE. A name
+  %% holding anything else is not an identifier and must never match.
+  case unicode:characters_to_list(DNSName) of
+    Decoded when is_list(Decoded) ->
+      case ascii_only(Decoded) of
+        {ok, Name} -> Name;
+        Error -> Error
+      end;
+    _ ->
+      {error, invalid}
+  end.
 
--spec decode(term(), atom()) -> string().
+-spec decode(term(), atom()) -> {ok, string()} | {error, invalid}.
 decode(X, Charset) ->
   case unicode:characters_to_list(X, Charset) of
-    Decoded when is_list(Decoded) -> Decoded;
+    Decoded when is_list(Decoded) -> {ok, Decoded};
     _ -> {error, invalid}
   end.
 
@@ -33,7 +44,7 @@ get_string({universalString, Str}) ->
 get_string({bmpString, Str}) ->
   {ok, Str};
 get_string({utf8String, Str}) ->
-  {ok, decode(Str, utf8)};
+  decode(Str, utf8);
 get_string({printableString, Str}) ->
   case is_printable_string(Str) of
     true ->

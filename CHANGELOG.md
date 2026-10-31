@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Security
+
+- A `dNSName` that is not valid ASCII is never handed to the matcher undecoded. Such an
+  identifier does not match (RFC 5280 Section 4.2.1.6, IA5String) and no longer raises
+  `function_clause` in `ssl_verify_string:strip_right/2` (#7).
+
+### Maintenance
+
+- Unit tests for `ssl_verify_fun_encodings`, including a regression test for undecodable
+  `dNSName` entries (#10).
+- An undecodable `utf8String` is reported as `{error, invalid}` instead of
+  `{ok, {error, invalid}}`.
+
 ## 1.1.8
 
 ### Security

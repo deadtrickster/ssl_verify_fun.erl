@@ -16,7 +16,7 @@
 %% Public API
 %%====================================================================
 
--spec extract_dns_names(Cert :: #'OTPCertificate'{}) -> [] | [string()].
+-spec extract_dns_names(Cert :: #'OTPCertificate'{}) -> [] | [string() | {error, invalid}].
 extract_dns_names(Cert)->
   TBSCert = Cert#'OTPCertificate'.tbsCertificate,
   Extensions = extensions_list(TBSCert#'OTPTBSCertificate'.extensions),
@@ -60,7 +60,8 @@ select_extension(Id, Extensions) ->
     [H|_] -> H
   end.
 
--spec extract_dns_names_from_alt_names([term()], list()) -> [] | [string()].
+-spec extract_dns_names_from_alt_names([term()], list()) ->
+                                        [] | [string() | {error, invalid}].
 extract_dns_names_from_alt_names([ExtValue | Rest], Acc) ->
   Acc1 = case ExtValue of
            {dNSName, DNSName} ->

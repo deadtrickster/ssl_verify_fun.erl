@@ -62,7 +62,8 @@ verify_cert_hostname(Cert, Hostname) ->
 %% Private Parts
 %%====================================================================
 
--spec try_match_hostnames([string()], Hostname :: string()) -> boolean().
+-spec try_match_hostnames([string() | {error, invalid}], Hostname :: string()) ->
+        boolean().
 try_match_hostnames([DNSName| REST], Hostname) ->
   case try_match_hostname(DNSName, Hostname) of
     true ->
@@ -73,7 +74,7 @@ try_match_hostnames([DNSName| REST], Hostname) ->
 try_match_hostnames([], _Hostname) ->
   false.
 
--spec maybe_check_subject_cn(DNSNames :: [string()],
+-spec maybe_check_subject_cn(DNSNames :: [string() | {error, invalid}],
                              DNSNameMatched :: boolean(),
                              Cert :: #'OTPCertificate'{},
                              Hostname :: string()) -> true | unable_to_match_altnames | unable_to_match_common_name | unable_to_decode_common_name.
@@ -117,10 +118,9 @@ try_match_wildcard(BeforeW, AfterW, SingleCharW, Pattern) ->
   %% doesn't matter since parts after Wildcard should match unconditionally.
   %% However if Wildcard was the only character in left-most label we can't
   %% match this *.example.com and bar.foo.example.com
-  %% Likewise, a partial-label wildcard such as *o.example.com must not match
-  %% bar.foo.example.com: RFC 6125 Section 6.4.3 only allows the wildcard to
-  %% match within the left-most label, so the characters it consumes in the
-  %% presented hostname must not contain a dot.
+  %% A partial-label wildcard such as *o.example.com must not match
+  %% bar.foo.example.com: what it consumes stays inside the left-most label
+  %% (RFC 6125 Section 6.4.3), so an identifier cannot reach a delegated label.
   FirstPatternDotPos = ssl_verify_string:chr(Pattern, $.),
   case SingleCharW of
     true ->
@@ -210,6 +210,9 @@ validate_wildcard_identifier(Identifier, Hostname, WildcardPos) ->
       end
   end.
 
+try_match_hostname(Identifier, _Hostname) when not is_list(Identifier) ->
+  %% an identifier that did not decode (non-ASCII dNSName) never matches
+  false;
 try_match_hostname(Identifier0, Hostname0) ->
   Identifier = ssl_verify_string:strip(Identifier0, right, $.), %% what about *.com.??
   Hostname = ssl_verify_string:strip(Hostname0, right, $.),
@@ -218,7 +221,8 @@ try_match_hostname(Identifier0, Hostname0) ->
       true;
     false ->
       %% a literal IP address is an IP-ID, not a DNS-ID, and must never be
-      %% matched by a wildcard (RFC 6125 Section 1.7.2, RFC 9110 Section 4.3.4)
+      %% matched by a wildcard (RFC 6125 Section 1.7.2, RFC 9110 Section 4.3.4,
+      %% and Section 4.3.5: an IP-ID matches only an identical iPAddress)
       case is_ip_address(Hostname) of
         true -> false;
         false ->
