@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.9
 
 ### Security
 
@@ -14,6 +14,8 @@
   `dNSName` entries (#10).
 - An undecodable `utf8String` is reported as `{error, invalid}` instead of
   `{ok, {error, invalid}}`.
+- Docs build and publish from `mix.exs` now, so hexdocs.pm/ssl_verify_fun/ resolves.
+  The README is the main page; module pages return once `src` carries edoc annotations.
 
 ## 1.1.8
 
